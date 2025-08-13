@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+
+{% block title %}Service Ledger - Service Management{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        <i class="bi bi-journal-text text-primary me-2"></i>
+        Service Ledger
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{% url 'services:service_inward_list' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>
+            Back to Services
+        </a>
+    </div>
+</div>
+
+<!-- Ledger Summary -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h4 class="text-primary">{{ page_obj.paginator.count }}</h4>
+                <p class="text-muted mb-0">Total Entries</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h4 class="text-success">₹{{ total_amount|floatformat:2 }}</h4>
+                <p class="text-muted mb-0">Total Amount</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h4 class="text-info">{{ unique_services }}</h4>
+                <p class="text-muted mb-0">Services</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h4 class="text-warning">{{ unique_customers }}</h4>
+                <p class="text-muted mb-0">Customers</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Ledger Entries Table -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i class="bi bi-table me-2"></i>
+            All Ledger Entries ({{ page_obj.paginator.count }} total)
+        </h5>
+    </div>
+    <div class="card-body">
+        {% if page_obj %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Service</th>
+                            <th>Customer</th>
+                            <th>Transaction Type</th>
+                            <th>Description</th>
+                            <th>Amount</th>
+                            <th>Created By</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in page_obj %}
+                        <tr>
+                            <td>
+                                <div>
+                                    {{ entry.date|date:"M d, Y" }}
+                                    <br>
+                                    <small class="text-muted">{{ entry.date|date:"H:i" }}</small>
+                                </div>
+                            </td>
+                            <td>
+                                <div>
+                                    <strong>{{ entry.service_item.device_type|title }}</strong>
+                                    <br>
+                                    <small class="text-muted">{{ entry.service_item.brand }} {{ entry.service_item.model }}</small>
+                                </div>
+                            </td>
+                            <td>
+                                <div>
+                                    <strong>{{ entry.service_item.customer.name }}</strong>
+                                    <br>
+                                    <small class="text-muted">{{ entry.service_item.customer.phone }}</small>
+                                </div>
+                            </td>
+                            <td>
+                                {% if entry.transaction_type == 'inward' %}
+                                    <span class="badge bg-primary">Inward</span>
+                                {% elif entry.transaction_type == 'progress' %}
+                                    <span class="badge bg-info">Progress</span>
+                                {% elif entry.transaction_type == 'completion' %}
+                                    <span class="badge bg-success">Completion</span>
+                                {% elif entry.transaction_type == 'delivery' %}
+                                    <span class="badge bg-warning">Delivery</span>
+                                {% elif entry.transaction_type == 'payment' %}
+                                    <span class="badge bg-success">Payment</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ entry.transaction_type|title }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="text-truncate" style="max-width: 200px;" title="{{ entry.description }}">
+                                    {{ entry.description|truncatechars:100 }}
+                                </div>
+                                {% if entry.notes %}
+                                    <small class="text-muted">{{ entry.notes|truncatechars:50 }}</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if entry.amount > 0 %}
+                                    <span class="text-success fw-bold">₹{{ entry.amount|floatformat:2 }}</span>
+                                {% else %}
+                                    <span class="text-muted">₹0.00</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <small class="text-muted">{{ entry.created_by }}</small>
+                            </td>
+                            <td>
+                                <a href="{% url 'services:service_ledger_detail' entry.service_item.id %}" 
+                                   class="btn btn-sm btn-outline-primary" title="View Service Details">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if page_obj.has_other_pages %}
+            <nav aria-label="Ledger pagination" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1">
+                                <i class="bi bi-chevron-double-left"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                                <i class="bi bi-chevron-left"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">
+                                <i class="bi bi-chevron-double-right"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+
+        {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-journal-x fs-1 text-muted"></i>
+                <h4 class="text-muted mt-3">No ledger entries found</h4>
+                <p class="text-muted">Ledger entries will appear here when services are created and updated.</p>
+                <a href="{% url 'services:add_service_inward' %}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle me-1"></i>
+                    Add New Service
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %} 
