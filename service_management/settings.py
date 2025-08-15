@@ -117,6 +117,12 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+#csrf trusted orgins
+CSRF_TRUSTED_ORIGINS = [ 
+    'https://roboservice.onrender.com'
+    'https://service.onrender.com'
+]
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
