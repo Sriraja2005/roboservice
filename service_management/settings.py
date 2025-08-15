@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-l$q4m7at2r2k)uh*k(%^nqge=j8porepdi+wjfudqiyjr-*0ci'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = true
+DEBUG = True
 
 ALLOWED_HOSTS = ['roboservice.onrender.com']
 CSRF_TRUSTED_ORIGINS = [ 
