@@ -27,7 +27,7 @@ DEBUG = true
 
 ALLOWED_HOSTS = ['roboservice.onrender.com']
 CSRF_TRUSTED_ORIGINS = [ 
-    'https://roboservice.onrender.com'
+    'https://roboservice.onrender.com',
     'https://service.onrender.com'
 ]
 
