@@ -26,6 +26,10 @@ SECRET_KEY = 'django-insecure-l$q4m7at2r2k)uh*k(%^nqge=j8porepdi+wjfudqiyjr-*0ci
 DEBUG = True
 
 ALLOWED_HOSTS = ['roboservice.onrender.com']
+CSRF_TRUSTED_ORIGINS = [ 
+    'https://roboservice.onrender.com'
+    'https://service.onrender.com'
+]
 
 
 # Application definition
@@ -118,10 +122,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 #csrf trusted orgins
-CSRF_TRUSTED_ORIGINS = [ 
-    'https://roboservice.onrender.com'
-    'https://service.onrender.com'
-]
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
