@@ -25,7 +25,11 @@ SECRET_KEY = 'django-insecure-l$q4m7at2r2k)uh*k(%^nqge=j8porepdi+wjfudqiyjr-*0ci
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['roboservice.onrender.com']
+CSRF_TRUSTED_ORIGINS = [ 
+    'https://roboservice.onrender.com',
+    'https://service.onrender.com'
+]
 
 
 # Application definition
@@ -115,10 +119,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
-STATICFILES_DIRS = [
-    BASE_DIR / 'static',
-]
+STATIC_URL = '/static/'
+
+#csrf trusted orgins
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
