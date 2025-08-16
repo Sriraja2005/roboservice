@@ -33,7 +33,7 @@ class ServiceItemForm(forms.ModelForm):
         fields = [
             'device_type', 'brand', 'model', 'serial_number',
             'problem_description', 'accessories_received',
-            'estimated_cost', 'technician_notes'
+            'estimated_cost', 'technician_notes', 'problem_resolved'
         ]
         widgets = {
             'device_type': forms.Select(attrs={
@@ -72,6 +72,11 @@ class ServiceItemForm(forms.ModelForm):
                 'rows': 3,
                 'placeholder': 'Add technician notes (optional)'
             }),
+            'problem_resolved': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 4,
+                'placeholder': 'Describe how the problem was resolved (optional)'
+            }),
         }
 
 class ServiceInwardForm(forms.ModelForm):
@@ -81,7 +86,8 @@ class ServiceInwardForm(forms.ModelForm):
         widgets = {
             'inward_number': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Enter inward number'
+                'placeholder': 'Auto-generated (RDC format)',
+                'readonly': 'readonly'
             }),
             'received_by': forms.TextInput(attrs={
                 'class': 'form-control',

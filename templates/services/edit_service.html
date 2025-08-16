@@ -122,7 +122,17 @@
                             <label for="{{ form.actual_cost.id_for_label }}" class="form-label">
                                 Actual Cost
                             </label>
-                            {{ form.actual_cost }}
+                            <div class="input-group">
+                                {{ form.actual_cost }}
+                                <button type="button" class="btn btn-outline-primary" 
+                                        onclick="updateActualCost('{{ service_item.id }}', document.getElementById('{{ form.actual_cost.id_for_label }}'))">
+                                    <i class="bi bi-check-circle"></i> Update AJAX
+                                </button>
+                            </div>
+                            <small class="form-text text-muted">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Click "Update AJAX" to save changes immediately, or use the main form below
+                            </small>
                             {% if form.actual_cost.errors %}
                                 <div class="invalid-feedback d-block">
                                     {{ form.actual_cost.errors.0 }}
@@ -141,6 +151,22 @@
                                 {{ form.technician_notes.errors.0 }}
                             </div>
                         {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.problem_resolved.id_for_label }}" class="form-label">
+                            Problem Resolved
+                        </label>
+                        {{ form.problem_resolved }}
+                        {% if form.problem_resolved.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.problem_resolved.errors.0 }}
+                            </div>
+                        {% endif %}
+                        <small class="form-text text-muted">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Describe how the problem was resolved and what work was performed
+                        </small>
                     </div>
                     
                     <div class="d-flex justify-content-end gap-2">
@@ -189,6 +215,8 @@
                 {% if service_item.delivered_date %}
                 <p><strong>Delivered Date:</strong><br>{{ service_item.delivered_date|date:"M d, Y" }}</p>
                 {% endif %}
+                <p><strong>Estimated Cost:</strong><br>₹{{ service_item.estimated_cost|floatformat:2 }}</p>
+                <p><strong>Current Actual Cost:</strong><br>₹{{ service_item.actual_cost|floatformat:2 }}</p>
             </div>
         </div>
         

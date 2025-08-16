@@ -12,6 +12,8 @@ urlpatterns = [
     path('inward/add/', views.add_service_inward, name='add_service_inward'),
     path('inward/<int:service_id>/edit/', views.edit_service, name='edit_service'),
     path('inward/<int:service_id>/status/', views.update_service_status, name='update_service_status'),
+    path('inward/<int:service_id>/cost/', views.update_actual_cost, name='update_actual_cost'),
+    path('inward/<int:service_id>/test-cost/', views.test_actual_cost_update, name='test_actual_cost_update'),
     
     # Service Ledger
     path('ledger/', views.service_ledger, name='service_ledger'),

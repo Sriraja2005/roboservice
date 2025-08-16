@@ -73,6 +73,18 @@
                         {{ service_item.received_date|date:"M d, Y" }}
                     </div>
                 </div>
+                {% if service_item.problem_resolved %}
+                <hr>
+                <div class="row">
+                    <div class="col-12">
+                        <strong>Problem Resolution:</strong><br>
+                        <div class="alert alert-success" style="margin-bottom: 0; padding: 10px;">
+                            <i class="bi bi-check-circle me-1"></i>
+                            {{ service_item.problem_resolved|linebreaks }}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>

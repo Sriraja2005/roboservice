@@ -144,7 +144,7 @@ class Command(BaseCommand):
                 self.stdout.write(f'Created service: {service.customer.name} - {service.device_type}')
                 
                 # Create inward entry
-                inward_number = f"INW{timezone.now().strftime('%Y%m%d')}{service.id:04d}"
+                inward_number = f"RDC{service.id:04d}"
                 inward = ServiceInward.objects.create(
                     service_item=service,
                     inward_number=inward_number,

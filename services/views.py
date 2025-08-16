@@ -1,5 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.forms import AuthenticationForm
 from django.db.models import Sum, Count, Q
 from django.utils import timezone
 from django.http import JsonResponse
@@ -9,6 +12,35 @@ from django import forms
 from .models import Customer, ServiceItem, ServiceInward, ServiceLedger, ServiceExpense
 from .forms import CustomerForm, ServiceItemForm, ServiceInwardForm, ServiceLedgerForm, ServiceExpenseForm
 
+def login_view(request):
+    """User login view"""
+    if request.user.is_authenticated:
+        return redirect('services:dashboard')
+    
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                login(request, user)
+                messages.success(request, f'Welcome back, {user.username}!')
+                return redirect('services:dashboard')
+        else:
+            messages.error(request, 'Invalid username or password.')
+    else:
+        form = AuthenticationForm()
+    
+    return render(request, 'services/login.html', {'form': form})
+
+def logout_view(request):
+    """User logout view"""
+    logout(request)
+    messages.success(request, 'You have been successfully logged out.')
+    return redirect('services:login')
+
+@login_required
 def dashboard(request):
     """Main dashboard view"""
     # Get statistics
@@ -56,6 +88,7 @@ def dashboard(request):
     
     return render(request, 'services/dashboard.html', context)
 
+@login_required
 def service_inward_list(request):
     """Service inward list view"""
     search_query = request.GET.get('search', '')
@@ -94,6 +127,7 @@ def service_inward_list(request):
     
     return render(request, 'services/service_inward_list.html', context)
 
+@login_required
 def service_ledger(request, service_id=None):
     """Service ledger view"""
     if service_id:
@@ -127,6 +161,7 @@ def service_ledger(request, service_id=None):
         }
         return render(request, 'services/service_ledger.html', context)
 
+@login_required
 def add_service_inward(request):
     """Add new service inward"""
     if request.method == 'POST':
@@ -146,8 +181,22 @@ def add_service_inward(request):
             service_item.actual_cost = 0.00  # Set default actual cost to 0
             service_item.save()
             
+            # Generate inward number with RDC prefix and serial number
+            last_inward = ServiceInward.objects.order_by('-id').first()
+            if last_inward:
+                try:
+                    last_number = int(last_inward.inward_number.replace('RDC', ''))
+                    new_number = last_number + 1
+                except ValueError:
+                    new_number = 1
+            else:
+                new_number = 1
+            
+            inward_number = f"RDC{new_number:04d}"
+            
             inward = inward_form.save(commit=False)
             inward.service_item = service_item
+            inward.inward_number = inward_number
             inward.save()
             
             # Create initial ledger entry
@@ -182,6 +231,7 @@ def add_service_inward(request):
     
     return render(request, 'services/add_service_inward.html', context)
 
+@login_required
 def edit_service(request, service_id):
     """Edit service item"""
     service_item = get_object_or_404(ServiceItem, id=service_id)
@@ -189,7 +239,18 @@ def edit_service(request, service_id):
     if request.method == 'POST':
         form = ServiceItemForm(request.POST, instance=service_item)
         if form.is_valid():
-            form.save()
+            # Get the actual_cost from POST data
+            actual_cost = request.POST.get('actual_cost', 0.00)
+            try:
+                actual_cost = float(actual_cost) if actual_cost else 0.00
+            except ValueError:
+                actual_cost = 0.00
+            
+            # Save the form
+            service_item = form.save(commit=False)
+            service_item.actual_cost = actual_cost
+            service_item.save()
+            
             messages.success(request, 'Service updated successfully!')
             return redirect('services:service_inward_list')
     else:
@@ -200,6 +261,7 @@ def edit_service(request, service_id):
             max_digits=10, 
             decimal_places=2, 
             required=False,
+            initial=service_item.actual_cost,
             widget=forms.NumberInput(attrs={
                 'class': 'form-control',
                 'step': '0.01',
@@ -215,6 +277,7 @@ def edit_service(request, service_id):
     
     return render(request, 'services/edit_service.html', context)
 
+@login_required
 def add_ledger_entry(request, service_id):
     """Add ledger entry for a service"""
     service_item = get_object_or_404(ServiceItem, id=service_id)
@@ -237,6 +300,7 @@ def add_ledger_entry(request, service_id):
     
     return render(request, 'services/add_ledger_entry.html', context)
 
+@login_required
 def add_expense(request, service_id):
     """Add expense for a service"""
     service_item = get_object_or_404(ServiceItem, id=service_id)
@@ -259,6 +323,7 @@ def add_expense(request, service_id):
     
     return render(request, 'services/add_expense.html', context)
 
+@login_required
 def update_service_status(request, service_id):
     """Update service status via AJAX"""
     if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -290,6 +355,58 @@ def update_service_status(request, service_id):
     
     return JsonResponse({'success': False})
 
+@login_required
+def update_actual_cost(request, service_id):
+    """Update actual cost via AJAX"""
+    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        service_item = get_object_or_404(ServiceItem, id=service_id)
+        actual_cost = request.POST.get('actual_cost')
+        
+        try:
+            actual_cost = float(actual_cost) if actual_cost else 0.00
+            service_item.actual_cost = actual_cost
+            service_item.save()
+            
+            # Create ledger entry for cost update
+            ServiceLedger.objects.create(
+                service_item=service_item,
+                transaction_type='completion',
+                description=f'Actual cost updated to ₹{actual_cost:.2f}',
+                amount=actual_cost,
+                notes=f'Cost update: Estimated ₹{service_item.estimated_cost:.2f} → Actual ₹{actual_cost:.2f}'
+            )
+            
+            return JsonResponse({
+                'success': True, 
+                'actual_cost': actual_cost,
+                'message': f'Actual cost updated successfully to ₹{actual_cost:.2f}!'
+            })
+        except ValueError:
+            return JsonResponse({
+                'success': False, 
+                'message': 'Invalid cost amount provided.'
+            })
+    
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+
+@login_required
+def test_actual_cost_update(request, service_id):
+    """Test view to verify actual cost update"""
+    service_item = get_object_or_404(ServiceItem, id=service_id)
+    
+    if request.method == 'POST':
+        actual_cost = request.POST.get('actual_cost')
+        try:
+            actual_cost = float(actual_cost) if actual_cost else 0.00
+            service_item.actual_cost = actual_cost
+            service_item.save()
+            messages.success(request, f'Actual cost updated to ₹{actual_cost:.2f}')
+        except ValueError:
+            messages.error(request, 'Invalid cost amount')
+    
+    return redirect('services:edit_service', service_id=service_id)
+
+@login_required
 def customer_list(request):
     """Customer list view"""
     search_query = request.GET.get('search', '')
@@ -320,6 +437,7 @@ def customer_list(request):
     
     return render(request, 'services/customer_list.html', context)
 
+@login_required
 def customer_detail(request, customer_id):
     """Customer detail view"""
     customer = get_object_or_404(Customer, id=customer_id)
@@ -348,6 +466,7 @@ def customer_detail(request, customer_id):
     
     return render(request, 'services/customer_detail.html', context)
 
+@login_required
 def print_service_report(request, service_id):
     """Print service report"""
     service_item = get_object_or_404(ServiceItem, id=service_id)

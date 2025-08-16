@@ -47,6 +47,7 @@ class ServiceItem(models.Model):
     completed_date = models.DateTimeField(blank=True, null=True)
     delivered_date = models.DateTimeField(blank=True, null=True)
     technician_notes = models.TextField(blank=True, null=True)
+    problem_resolved = models.TextField(blank=True, null=True, help_text="Description of how the problem was resolved")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

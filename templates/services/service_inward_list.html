@@ -56,6 +56,9 @@
     </div>
 </div>
 
+<!-- CSRF Token for AJAX -->
+{% csrf_token %}
+
 <!-- Services Table -->
 <div class="card">
     <div class="card-header">
@@ -104,7 +107,13 @@
                             </td>
                             <td>
                                 <div class="text-truncate" style="max-width: 200px;" title="{{ service.problem_description }}">
-                                    {{ service.problem_description|truncatechars:100 }}
+                                    <strong>Problem:</strong> {{ service.problem_description|truncatechars:80 }}<br>
+                                    {% if service.problem_resolved %}
+                                        <small class="text-success">
+                                            <i class="bi bi-check-circle"></i> 
+                                            <strong>Resolved:</strong> {{ service.problem_resolved|truncatechars:80 }}
+                                        </small>
+                                    {% endif %}
                                 </div>
                             </td>
                             <td>
@@ -129,7 +138,14 @@
                                 <span class="text-primary">₹{{ service.estimated_cost|floatformat:2 }}</span>
                             </td>
                             <td>
-                                <span class="text-success">₹{{ service.actual_cost|floatformat:2 }}</span>
+                                <div class="input-group input-group-sm" style="width: 120px;">
+                                    <input type="number" class="form-control form-control-sm" 
+                                           value="{{ service.actual_cost|floatformat:2 }}" 
+                                           step="0.01" min="0" 
+                                           onchange="updateActualCost('{{ service.id }}', this)"
+                                           style="font-size: 0.875rem;">
+                                    <span class="input-group-text">₹</span>
+                                </div>
                             </td>
                             <td>
                                 <div class="btn-group" role="group">

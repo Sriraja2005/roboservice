@@ -220,6 +220,22 @@
                         </div>
                     {% endif %}
                 </div>
+                
+                <div class="col-12 mb-3">
+                    <label for="{{ service_form.problem_resolved.id_for_label }}" class="form-label">
+                        Problem Resolved (Optional)
+                    </label>
+                    {{ service_form.problem_resolved }}
+                    <small class="form-text text-muted">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Describe how the problem was resolved (can be filled later when service is completed)
+                    </small>
+                    {% if service_form.problem_resolved.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ service_form.problem_resolved.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
             </div>
 
             <!-- Inward Information -->
@@ -236,6 +252,10 @@
                         Inward Number <span class="text-danger">*</span>
                     </label>
                     {{ inward_form.inward_number }}
+                    <small class="form-text text-muted">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Auto-generated in RDC format (e.g., RDC0001, RDC0002)
+                    </small>
                     {% if inward_form.inward_number.errors %}
                         <div class="invalid-feedback d-block">
                             {{ inward_form.inward_number.errors.0 }}

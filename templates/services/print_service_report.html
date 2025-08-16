@@ -243,6 +243,9 @@
                 </td>
                 <td>
                     <strong>Problem:</strong> {{ service_item.problem_description|truncatechars:100 }}<br>
+                    {% if service_item.problem_resolved %}
+                        <strong>Resolution:</strong> {{ service_item.problem_resolved|truncatechars:100 }}<br>
+                    {% endif %}
                     {% if service_item.accessories_received %}
                         <strong>Accessories:</strong> {{ service_item.accessories_received|truncatechars:100 }}
                     {% endif %}
@@ -252,17 +255,20 @@
         </tbody>
     </table>
 
+    {% if service_item.problem_resolved %}
+    <div class="resolution-section" style="margin: 30px 0; padding: 20px; background-color: #f8f9fa; border-radius: 8px; border-left: 4px solid #28a745;">
+        <h4 style="color: #28a745; margin-bottom: 15px;">
+            <i class="bi bi-check-circle"></i> Problem Resolution
+        </h4>
+        <p style="margin-bottom: 0; line-height: 1.6;">
+            {{ service_item.problem_resolved|linebreaks }}
+        </p>
+    </div>
+    {% endif %}
+
     <div class="total-section">
-        <div class="total-row">
-            <span>Estimated Cost:</span>
-            <span>₹{{ service_item.estimated_cost|floatformat:2 }}</span>
-        </div>
-        <div class="total-row">
-            <span>Actual Cost:</span>
-            <span>₹{{ service_item.actual_cost|floatformat:2 }}</span>
-        </div>
         <div class="total-row total-amount">
-            <span><strong>TOTAL AMOUNT:</strong></span>
+            <span><strong>TOTAL AMOUNT TO BE PAID:</strong></span>
             <span><strong>₹{{ service_item.actual_cost|floatformat:2 }}</strong></span>
         </div>
     </div>
