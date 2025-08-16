@@ -236,6 +236,22 @@
                         </div>
                     {% endif %}
                 </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label for="{{ service_form.payment_status.id_for_label }}" class="form-label">
+                        Payment Status
+                    </label>
+                    {{ service_form.payment_status }}
+                    <small class="form-text text-muted">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Default is "Payment Pending" - can be updated later
+                    </small>
+                    {% if service_form.payment_status.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ service_form.payment_status.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
             </div>
 
             <!-- Inward Information -->

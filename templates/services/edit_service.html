@@ -169,6 +169,28 @@
                         </small>
                     </div>
                     
+                    <div class="mb-3">
+                        <label for="{{ form.payment_status.id_for_label }}" class="form-label">
+                            Payment Status
+                        </label>
+                        <div class="input-group">
+                            {{ form.payment_status }}
+                            <button type="button" class="btn btn-outline-primary" 
+                                    onclick="updatePaymentStatus('{{ service_item.id }}', document.getElementById('{{ form.payment_status.id_for_label }}'))">
+                                <i class="bi bi-check-circle"></i> Update
+                            </button>
+                        </div>
+                        <small class="form-text text-muted">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Click "Update" to save payment status immediately
+                        </small>
+                        {% if form.payment_status.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.payment_status.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
                     <div class="d-flex justify-content-end gap-2">
                         <a href="{% url 'services:service_inward_list' %}" class="btn btn-outline-secondary">
                             <i class="bi bi-x-circle me-1"></i>

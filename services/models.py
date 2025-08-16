@@ -32,6 +32,12 @@ class ServiceItem(models.Model):
         ('delivered', 'Delivered'),
         ('cancelled', 'Cancelled'),
     ]
+    
+    PAYMENT_STATUS_CHOICES = [
+        ('pending', 'Payment Pending'),
+        ('received', 'Payment Received'),
+        ('partial', 'Partial Payment'),
+    ]
 
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='service_items')
     device_type = models.CharField(max_length=20, choices=DEVICE_TYPES)
@@ -43,6 +49,7 @@ class ServiceItem(models.Model):
     estimated_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     actual_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='pending')
     received_date = models.DateTimeField(auto_now_add=True)
     completed_date = models.DateTimeField(blank=True, null=True)
     delivered_date = models.DateTimeField(blank=True, null=True)

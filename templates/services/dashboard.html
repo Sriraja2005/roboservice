@@ -59,6 +59,49 @@
     </div>
 </div>
 
+<!-- Payment Statistics -->
+<div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-warning h-100">
+            <div class="card-body text-center">
+                <div class="stats-number text-warning">₹{{ total_pending_amount|floatformat:2 }}</div>
+                <div class="text-muted">Pending Amount</div>
+                <i class="bi bi-exclamation-triangle fs-1 mt-2 text-warning"></i>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-success h-100">
+            <div class="card-body text-center">
+                <div class="stats-number text-success">{{ received_payments }}</div>
+                <div class="text-muted">Paid Services</div>
+                <i class="bi bi-check-circle fs-1 mt-2 text-success"></i>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-info h-100">
+            <div class="card-body text-center">
+                <div class="stats-number text-info">{{ partial_payments }}</div>
+                <div class="text-muted">Partial Payments</div>
+                <i class="bi bi-clock-history fs-1 mt-2 text-info"></i>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-danger h-100">
+            <div class="card-body text-center">
+                <div class="stats-number text-danger">{{ pending_payments }}</div>
+                <div class="text-muted">Unpaid Services</div>
+                <i class="bi bi-x-circle fs-1 mt-2 text-danger"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Status Overview -->
 <div class="row mb-4">
     <div class="col-lg-8">

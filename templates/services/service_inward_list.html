@@ -77,6 +77,7 @@
                             <th>Device</th>
                             <th>Problem</th>
                             <th>Status</th>
+                            <th>Payment Status</th>
                             <th>Received Date</th>
                             <th>Estimated Cost</th>
                             <th>Actual Cost</th>
@@ -125,6 +126,22 @@
                                             {{ label }}
                                         </option>
                                     {% endfor %}
+                                </select>
+                            </td>
+                            <td>
+                                <select class="form-select form-select-sm payment-status-select" 
+                                        data-service-id="{{ service.id }}" 
+                                        style="width: auto;"
+                                        onchange="updatePaymentStatus('{{ service.id }}', this)">
+                                    <option value="pending" {% if service.payment_status == 'pending' %}selected{% endif %}>
+                                        Payment Pending
+                                    </option>
+                                    <option value="received" {% if service.payment_status == 'received' %}selected{% endif %}>
+                                        Payment Received
+                                    </option>
+                                    <option value="partial" {% if service.payment_status == 'partial' %}selected{% endif %}>
+                                        Partial Payment
+                                    </option>
                                 </select>
                             </td>
                             <td>

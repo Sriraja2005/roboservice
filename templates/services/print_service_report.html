@@ -211,6 +211,16 @@
                     <span class="status-badge status-cancelled">Cancelled</span>
                 {% endif %}
             </div>
+            <div><strong>Payment:</strong></div>
+            <div>
+                {% if service_item.payment_status == 'pending' %}
+                    <span class="status-badge status-pending">Payment Pending</span>
+                {% elif service_item.payment_status == 'received' %}
+                    <span class="status-badge status-completed">Payment Received</span>
+                {% elif service_item.payment_status == 'partial' %}
+                    <span class="status-badge status-in_progress">Partial Payment</span>
+                {% endif %}
+            </div>
         </div>
     </div>
 

@@ -25,7 +25,10 @@ def login_view(request):
             user = authenticate(username=username, password=password)
             if user is not None:
                 login(request, user)
-                messages.success(request, f'Welcome back, {user.username}!')
+                if user.is_staff:
+                    messages.success(request, f'Welcome back, Admin {user.username}!')
+                else:
+                    messages.success(request, f'Welcome back, {user.username}!')
                 return redirect('services:dashboard')
         else:
             messages.error(request, 'Invalid username or password.')
@@ -36,9 +39,10 @@ def login_view(request):
 
 def logout_view(request):
     """User logout view"""
+    user_type = "Admin" if request.user.is_staff else "User"
     logout(request)
-    messages.success(request, 'You have been successfully logged out.')
-    return redirect('services:login')
+    messages.success(request, f'{user_type} logout successful. You have been logged out.')
+    return redirect('login')
 
 @login_required
 def dashboard(request):
@@ -57,6 +61,16 @@ def dashboard(request):
         completed_date__month=timezone.now().month,
         completed_date__year=timezone.now().year
     ).aggregate(total=Sum('actual_cost'))['total'] or 0
+    
+    # Payment statistics
+    pending_payments = ServiceItem.objects.filter(payment_status='pending').count()
+    received_payments = ServiceItem.objects.filter(payment_status='received').count()
+    partial_payments = ServiceItem.objects.filter(payment_status='partial').count()
+    
+    # Calculate pending amount
+    pending_amount = ServiceItem.objects.filter(payment_status='pending').aggregate(total=Sum('actual_cost'))['total'] or 0
+    partial_amount = ServiceItem.objects.filter(payment_status='partial').aggregate(total=Sum('actual_cost'))['total'] or 0
+    total_pending_amount = pending_amount + partial_amount
     
     # Device type statistics
     device_stats = ServiceItem.objects.values('device_type').annotate(
@@ -81,6 +95,10 @@ def dashboard(request):
         'delivered_services': delivered_services,
         'total_revenue': total_revenue,
         'this_month_revenue': this_month_revenue,
+        'pending_payments': pending_payments,
+        'received_payments': received_payments,
+        'partial_payments': partial_payments,
+        'total_pending_amount': total_pending_amount,
         'device_stats': device_stats,
         'recent_services': recent_services,
         'overdue_services': overdue_services,
@@ -385,6 +403,35 @@ def update_actual_cost(request, service_id):
             return JsonResponse({
                 'success': False, 
                 'message': 'Invalid cost amount provided.'
+            })
+    
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+
+@login_required
+def update_payment_status(request, service_id):
+    """Update payment status via AJAX"""
+    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        service_item = get_object_or_404(ServiceItem, id=service_id)
+        payment_status = request.POST.get('payment_status')
+        
+        if payment_status in dict(ServiceItem.PAYMENT_STATUS_CHOICES):
+            old_status = service_item.payment_status
+            service_item.payment_status = payment_status
+            service_item.save()
+            
+            # Create ledger entry for payment status change
+            ServiceLedger.objects.create(
+                service_item=service_item,
+                transaction_type='payment',
+                description=f'Payment status updated to {payment_status}',
+                amount=service_item.actual_cost if payment_status == 'received' else 0.00,
+                notes=f'Payment status: {old_status} → {payment_status}'
+            )
+            
+            return JsonResponse({
+                'success': True, 
+                'payment_status': payment_status,
+                'message': f'Payment status updated to {payment_status}!'
             })
     
     return JsonResponse({'success': False, 'message': 'Invalid request method.'})

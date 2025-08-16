@@ -33,7 +33,7 @@ class ServiceItemForm(forms.ModelForm):
         fields = [
             'device_type', 'brand', 'model', 'serial_number',
             'problem_description', 'accessories_received',
-            'estimated_cost', 'technician_notes', 'problem_resolved'
+            'estimated_cost', 'technician_notes', 'problem_resolved', 'payment_status'
         ]
         widgets = {
             'device_type': forms.Select(attrs={
@@ -76,6 +76,9 @@ class ServiceItemForm(forms.ModelForm):
                 'class': 'form-control',
                 'rows': 4,
                 'placeholder': 'Describe how the problem was resolved (optional)'
+            }),
+            'payment_status': forms.Select(attrs={
+                'class': 'form-control'
             }),
         }
 
