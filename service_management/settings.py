@@ -60,15 +60,20 @@ WSGI_APPLICATION = 'service_management.wsgi.application'
 
 
 # Supabase Database Configuration
-import dj_database_url
-
 DATABASES = {
-    'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL'),
-        conn_max_age=600,
-        ssl_require=True
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres',
+        'USER': 'postgres.xyipdblsmplzwobzgyyk',
+        'PASSWORD': 'Sathya@kodi8689',
+        'HOST': 'aws-1-ap-southeast-1.pooler.supabase.com',
+        'PORT': '6543',
+        'OPTIONS': {
+            'sslmode': 'require',
+        },
+    }
 }
+
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
