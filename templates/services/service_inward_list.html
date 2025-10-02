@@ -1,0 +1,302 @@
+{% extends 'base.html' %}
+
+{% block title %}Service Inward List - Service Management{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        <i class="bi bi-list-check text-primary me-2"></i>
+        Service Inward List
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{% url 'services:add_service_inward' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i>
+            New Service Inward
+        </a>
+    </div>
+</div>
+
+<!-- Search and Filter Form -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label for="search" class="form-label">Search</label>
+                <input type="text" class="form-control" id="search" name="search" 
+                       value="{{ search_query }}" placeholder="Search by customer, brand, model...">
+            </div>
+            <div class="col-md-3">
+                <label for="device_type" class="form-label">Device Type</label>
+                <select class="form-control" id="device_type" name="device_type">
+                    <option value="">All Devices</option>
+                    {% for value, label in device_types %}
+                        <option value="{{ value }}" {% if device_type == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="status" class="form-label">Status</label>
+                <select class="form-control" id="status" name="status">
+                    <option value="">All Status</option>
+                    {% for value, label in status_choices %}
+                        <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">&nbsp;</label>
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search me-1"></i>
+                        Search
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- CSRF Token for AJAX -->
+{% csrf_token %}
+
+<!-- Services Table -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i class="bi bi-table me-2"></i>
+            Services ({{ page_obj.paginator.count }} total)
+        </h5>
+    </div>
+    <div class="card-body">
+        {% if page_obj %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Customer</th>
+                            <th>Device</th>
+                            <th>Problem</th>
+                            <th>Status</th>
+                            <th>Payment Status</th>
+                            <th>Received Date</th>
+                            <th>Estimated Cost</th>
+                            <th>Actual Cost</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for service in page_obj %}
+                        <tr>
+                            <td>
+                                <div>
+                                    <strong>{{ service.customer.name }}</strong>
+                                    <br>
+                                    <small class="text-muted">{{ service.customer.phone }}</small>
+                                </div>
+                            </td>
+                            <td>
+                                <div>
+                                    <span class="badge bg-secondary me-1">{{ service.device_type|title }}</span>
+                                    <strong>{{ service.brand }}</strong>
+                                    <br>
+                                    <small class="text-muted">{{ service.model }}</small>
+                                    {% if service.serial_number %}
+                                        <br>
+                                        <small class="text-muted">SN: {{ service.serial_number }}</small>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="text-truncate" style="max-width: 200px;" title="{{ service.problem_description }}">
+                                    <strong>Problem:</strong> {{ service.problem_description|truncatechars:80 }}<br>
+                                    {% if service.problem_resolved %}
+                                        <small class="text-success">
+                                            <i class="bi bi-check-circle"></i> 
+                                            <strong>Resolved:</strong> {{ service.problem_resolved|truncatechars:80 }}
+                                        </small>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td>
+                                <select class="form-select form-select-sm status-select" 
+                                        data-service-id="{{ service.id }}" 
+                                        style="width: auto;">
+                                    {% for value, label in status_choices %}
+                                        <option value="{{ value }}" {% if service.status == value %}selected{% endif %}>
+                                            {{ label }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            <td>
+                                <select class="form-select form-select-sm payment-status-select" 
+                                        data-service-id="{{ service.id }}" 
+                                        style="width: auto;"
+                                        onchange="updatePaymentStatus('{{ service.id }}', this)">
+                                    <option value="pending" {% if service.payment_status == 'pending' %}selected{% endif %}>
+                                        Payment Pending
+                                    </option>
+                                    <option value="received" {% if service.payment_status == 'received' %}selected{% endif %}>
+                                        Payment Received
+                                    </option>
+                                    <option value="partial" {% if service.payment_status == 'partial' %}selected{% endif %}>
+                                        Partial Payment
+                                    </option>
+                                </select>
+                            </td>
+                            <td>
+                                <div>
+                                    {{ service.received_date|date:"M d, Y" }}
+                                    <br>
+                                    <small class="text-muted">{{ service.received_date|date:"H:i" }}</small>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="text-primary">₹{{ service.estimated_cost|floatformat:2 }}</span>
+                            </td>
+                            <td>
+                                <div class="input-group input-group-sm" style="width: 120px;">
+                                    <input type="number" class="form-control form-control-sm" 
+                                           value="{{ service.actual_cost|floatformat:2 }}" 
+                                           step="0.01" min="0" 
+                                           onchange="updateActualCost('{{ service.id }}', this)"
+                                           style="font-size: 0.875rem;">
+                                    <span class="input-group-text">₹</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a href="{% url 'services:edit_service' service.id %}" 
+                                       class="btn btn-sm btn-outline-primary" title="Edit">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a href="{% url 'services:service_ledger_detail' service.id %}" 
+                                       class="btn btn-sm btn-outline-info" title="View Ledger">
+                                        <i class="bi bi-journal-text"></i>
+                                    </a>
+                                    <a href="{% url 'services:add_ledger_entry' service.id %}" 
+                                       class="btn btn-sm btn-outline-success" title="Add Ledger Entry">
+                                        <i class="bi bi-plus"></i>
+                                    </a>
+                                    <a href="{% url 'services:print_service_report' service.id %}" 
+                                       class="btn btn-sm btn-outline-warning" title="Print Bill" target="_blank">
+                                        <i class="bi bi-printer"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if page_obj.has_other_pages %}
+            <nav aria-label="Service pagination" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if device_type %}&device_type={{ device_type }}{% endif %}{% if status %}&status={{ status }}{% endif %}">
+                                <i class="bi bi-chevron-double-left"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if device_type %}&device_type={{ device_type }}{% endif %}{% if status %}&status={{ status }}{% endif %}">
+                                <i class="bi bi-chevron-left"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if device_type %}&device_type={{ device_type }}{% endif %}{% if status %}&status={{ status }}{% endif %}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if device_type %}&device_type={{ device_type }}{% endif %}{% if status %}&status={{ status }}{% endif %}">
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if device_type %}&device_type={{ device_type }}{% endif %}{% if status %}&status={{ status }}{% endif %}">
+                                <i class="bi bi-chevron-double-right"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+
+        {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-inbox fs-1 text-muted"></i>
+                <h4 class="text-muted mt-3">No services found</h4>
+                <p class="text-muted">Try adjusting your search criteria or add a new service inward.</p>
+                <a href="{% url 'services:add_service_inward' %}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle me-1"></i>
+                    Add New Service
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Status change handler
+    $('.status-select').change(function() {
+        const serviceId = $(this).data('service-id');
+        const newStatus = $(this).val();
+        const selectElement = $(this);
+        
+        $.ajax({
+            url: `/services/inward/${serviceId}/status/`,
+            method: 'POST',
+            data: {
+                status: newStatus,
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.success) {
+                    // Show success message
+                    const alert = $('<div class="alert alert-success alert-dismissible fade show" role="alert">')
+                        .text('Status updated successfully!')
+                        .append('<button type="button" class="btn-close" data-bs-dismiss="alert"></button>');
+                    
+                    $('.messages').append(alert);
+                    
+                    // Auto-hide after 3 seconds
+                    setTimeout(function() {
+                        alert.fadeOut();
+                    }, 3000);
+                }
+            },
+            error: function() {
+                // Revert the selection on error
+                selectElement.val(selectElement.find('option[selected]').val());
+                
+                const alert = $('<div class="alert alert-danger alert-dismissible fade show" role="alert">')
+                    .text('Failed to update status. Please try again.')
+                    .append('<button type="button" class="btn-close" data-bs-dismiss="alert"></button>');
+                
+                $('.messages').append(alert);
+                
+                setTimeout(function() {
+                    alert.fadeOut();
+                }, 3000);
+            }
+        });
+    });
+});
+</script>
+{% endblock %} 

@@ -1,0 +1,233 @@
+{% extends 'base.html' %}
+
+{% block title %}Customer Details - {{ customer.name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        <i class="bi bi-person text-primary me-2"></i>
+        Customer Details - {{ customer.name }}
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{% url 'services:add_service_inward' %}" class="btn btn-primary me-2">
+            <i class="bi bi-plus-circle me-1"></i>
+            New Service
+        </a>
+        <a href="{% url 'services:customer_list' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>
+            Back to Customers
+        </a>
+    </div>
+</div>
+
+<!-- Customer Information -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Customer Information
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <strong>Name:</strong><br>
+                        {{ customer.name }}
+                    </div>
+                    <div class="col-sm-6">
+                        <strong>Phone:</strong><br>
+                        <i class="bi bi-telephone me-1"></i>{{ customer.phone }}
+                    </div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <strong>Email:</strong><br>
+                        {% if customer.email %}
+                            <i class="bi bi-envelope me-1"></i>{{ customer.email }}
+                        {% else %}
+                            <span class="text-muted">Not provided</span>
+                        {% endif %}
+                    </div>
+                    <div class="col-sm-6">
+                        <strong>Customer Since:</strong><br>
+                        {{ customer.created_at|date:"M d, Y" }}
+                    </div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-12">
+                        <strong>Address:</strong><br>
+                        <i class="bi bi-geo-alt me-1"></i>{{ customer.address }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-graph-up me-2"></i>
+                    Service Statistics
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h4 class="text-primary">{{ services.count }}</h4>
+                        <small class="text-muted">Total Services</small>
+                    </div>
+                    <div class="col-6">
+                        <h4 class="text-success">₹{{ total_spent|floatformat:2 }}</h4>
+                        <small class="text-muted">Total Spent</small>
+                    </div>
+                </div>
+                <hr>
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h5 class="text-warning">{{ pending_services }}</h5>
+                        <small class="text-muted">Pending</small>
+                    </div>
+                    <div class="col-6">
+                        <h5 class="text-info">{{ completed_services }}</h5>
+                        <small class="text-muted">Completed</small>
+                    </div>
+                </div>
+                <hr>
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h6 class="text-secondary">{{ laptop_count }}</h6>
+                        <small class="text-muted">Laptops</small>
+                    </div>
+                    <div class="col-6">
+                        <h6 class="text-secondary">{{ desktop_count }}</h6>
+                        <small class="text-muted">Desktops</small>
+                    </div>
+                </div>
+                {% if printer_count > 0 %}
+                <div class="row text-center mt-2">
+                    <div class="col-12">
+                        <h6 class="text-secondary">{{ printer_count }}</h6>
+                        <small class="text-muted">Printers</small>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Service History -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">
+            <i class="bi bi-clock-history me-2"></i>
+            Service History ({{ services.count }} services)
+        </h5>
+        <a href="{% url 'services:add_service_inward' %}" class="btn btn-sm btn-primary">
+            <i class="bi bi-plus me-1"></i>
+            Add New Service
+        </a>
+    </div>
+    <div class="card-body">
+        {% if services %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Device</th>
+                            <th>Problem</th>
+                            <th>Status</th>
+                            <th>Cost</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for service in services %}
+                        <tr>
+                            <td>
+                                <div>
+                                    {{ service.received_date|date:"M d, Y" }}
+                                    <br>
+                                    <small class="text-muted">{{ service.received_date|date:"H:i" }}</small>
+                                </div>
+                            </td>
+                            <td>
+                                <div>
+                                    <span class="badge bg-secondary me-1">{{ service.device_type|title }}</span>
+                                    <strong>{{ service.brand }}</strong>
+                                    <br>
+                                    <small class="text-muted">{{ service.model }}</small>
+                                    {% if service.serial_number %}
+                                        <br>
+                                        <small class="text-muted">SN: {{ service.serial_number }}</small>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="text-truncate" style="max-width: 200px;" title="{{ service.problem_description }}">
+                                    {{ service.problem_description|truncatechars:100 }}
+                                </div>
+                            </td>
+                            <td>
+                                {% if service.status == 'pending' %}
+                                    <span class="badge bg-warning">Pending</span>
+                                {% elif service.status == 'in_progress' %}
+                                    <span class="badge bg-info">In Progress</span>
+                                {% elif service.status == 'completed' %}
+                                    <span class="badge bg-success">Completed</span>
+                                {% elif service.status == 'delivered' %}
+                                    <span class="badge bg-primary">Delivered</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Cancelled</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div>
+                                    <span class="text-success fw-bold">₹{{ service.actual_cost|floatformat:2 }}</span>
+                                    {% if service.estimated_cost != service.actual_cost %}
+                                        <br>
+                                        <small class="text-muted">Est: ₹{{ service.estimated_cost|floatformat:2 }}</small>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a href="{% url 'services:edit_service' service.id %}" 
+                                       class="btn btn-sm btn-outline-primary" title="Edit">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a href="{% url 'services:service_ledger_detail' service.id %}" 
+                                       class="btn btn-sm btn-outline-info" title="View Ledger">
+                                        <i class="bi bi-journal-text"></i>
+                                    </a>
+                                    <a href="{% url 'services:print_service_report' service.id %}" 
+                                       class="btn btn-sm btn-outline-warning" title="Print Report" target="_blank">
+                                        <i class="bi bi-printer"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-tools fs-1 text-muted"></i>
+                <h4 class="text-muted mt-3">No services found</h4>
+                <p class="text-muted">This customer hasn't had any services yet.</p>
+                <a href="{% url 'services:add_service_inward' %}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle me-1"></i>
+                    Add First Service
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %} 

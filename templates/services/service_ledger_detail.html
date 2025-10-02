@@ -1,0 +1,257 @@
+{% extends 'base.html' %}
+
+{% block title %}Service Ledger - {{ service_item.customer.name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        <i class="bi bi-journal-text text-primary me-2"></i>
+        Service Ledger - {{ service_item.customer.name }}
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{% url 'services:print_service_report' service_item.id %}" 
+           class="btn btn-warning me-2" target="_blank">
+            <i class="bi bi-printer me-1"></i>
+            Print Bill
+        </a>
+        <a href="{% url 'services:add_ledger_entry' service_item.id %}" class="btn btn-success me-2">
+            <i class="bi bi-plus-circle me-1"></i>
+            Add Entry
+        </a>
+        <a href="{% url 'services:add_expense' service_item.id %}" class="btn btn-info me-2">
+            <i class="bi bi-cash me-1"></i>
+            Add Expense
+        </a>
+        <a href="{% url 'services:service_inward_list' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>
+            Back to List
+        </a>
+    </div>
+</div>
+
+<!-- Service Summary -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Service Information
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <strong>Customer:</strong><br>
+                        {{ service_item.customer.name }}<br>
+                        <small class="text-muted">{{ service_item.customer.phone }}</small>
+                    </div>
+                    <div class="col-sm-6">
+                        <strong>Device:</strong><br>
+                        <span class="badge bg-secondary me-1">{{ service_item.device_type|title }}</span>
+                        {{ service_item.brand }} {{ service_item.model }}
+                    </div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <strong>Status:</strong><br>
+                        {% if service_item.status == 'pending' %}
+                            <span class="badge bg-warning">Pending</span>
+                        {% elif service_item.status == 'in_progress' %}
+                            <span class="badge bg-info">In Progress</span>
+                        {% elif service_item.status == 'completed' %}
+                            <span class="badge bg-success">Completed</span>
+                        {% elif service_item.status == 'delivered' %}
+                            <span class="badge bg-primary">Delivered</span>
+                        {% else %}
+                            <span class="badge bg-danger">Cancelled</span>
+                        {% endif %}
+                    </div>
+                    <div class="col-sm-6">
+                        <strong>Received:</strong><br>
+                        {{ service_item.received_date|date:"M d, Y" }}
+                    </div>
+                </div>
+                {% if service_item.problem_resolved %}
+                <hr>
+                <div class="row">
+                    <div class="col-12">
+                        <strong>Problem Resolution:</strong><br>
+                        <div class="alert alert-success" style="margin-bottom: 0; padding: 10px;">
+                            <i class="bi bi-check-circle me-1"></i>
+                            {{ service_item.problem_resolved|linebreaks }}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-calculator me-2"></i>
+                    Financial Summary
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h4 class="text-primary">₹{{ service_item.estimated_cost|floatformat:2 }}</h4>
+                        <small class="text-muted">Estimated Cost</small>
+                    </div>
+                    <div class="col-6">
+                        <h4 class="text-success">₹{{ service_item.actual_cost|floatformat:2 }}</h4>
+                        <small class="text-muted">Actual Cost</small>
+                    </div>
+                </div>
+                <hr>
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h5 class="text-info">₹{{ total_ledger_amount|floatformat:2 }}</h5>
+                        <small class="text-muted">Total Ledger</small>
+                    </div>
+                    <div class="col-6">
+                        <h5 class="text-warning">₹{{ total_expenses|floatformat:2 }}</h5>
+                        <small class="text-muted">Total Expenses</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Ledger Entries -->
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">
+            <i class="bi bi-list-ul me-2"></i>
+            Ledger Entries ({{ ledger_entries.count }})
+        </h5>
+        <a href="{% url 'services:add_ledger_entry' service_item.id %}" class="btn btn-sm btn-success">
+            <i class="bi bi-plus me-1"></i>
+            Add Entry
+        </a>
+    </div>
+    <div class="card-body">
+        {% if ledger_entries %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Transaction Type</th>
+                            <th>Description</th>
+                            <th>Amount</th>
+                            <th>Created By</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in ledger_entries %}
+                        <tr>
+                            <td>
+                                {{ entry.date|date:"M d, Y" }}<br>
+                                <small class="text-muted">{{ entry.date|date:"H:i" }}</small>
+                            </td>
+                            <td>
+                                {% if entry.transaction_type == 'inward' %}
+                                    <span class="badge bg-primary">Inward</span>
+                                {% elif entry.transaction_type == 'progress' %}
+                                    <span class="badge bg-info">Progress</span>
+                                {% elif entry.transaction_type == 'completion' %}
+                                    <span class="badge bg-success">Completion</span>
+                                {% elif entry.transaction_type == 'delivery' %}
+                                    <span class="badge bg-warning">Delivery</span>
+                                {% elif entry.transaction_type == 'payment' %}
+                                    <span class="badge bg-success">Payment</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ entry.transaction_type|title }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ entry.description }}</td>
+                            <td>
+                                {% if entry.amount > 0 %}
+                                    <span class="text-success fw-bold">₹{{ entry.amount|floatformat:2 }}</span>
+                                {% else %}
+                                    <span class="text-muted">₹0.00</span>
+                                {% endif %}
+                            </td>
+                            <td><small class="text-muted">{{ entry.created_by }}</small></td>
+                            <td>
+                                {% if entry.notes %}
+                                    <small class="text-muted">{{ entry.notes|truncatechars:50 }}</small>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-4">
+                <i class="bi bi-journal-x fs-1 text-muted"></i>
+                <p class="text-muted mt-2">No ledger entries found</p>
+                <a href="{% url 'services:add_ledger_entry' service_item.id %}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle me-1"></i>
+                    Add First Entry
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Expenses -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">
+            <i class="bi bi-cash-stack me-2"></i>
+            Expenses ({{ expenses.count }})
+        </h5>
+        <a href="{% url 'services:add_expense' service_item.id %}" class="btn btn-sm btn-info">
+            <i class="bi bi-plus me-1"></i>
+            Add Expense
+        </a>
+    </div>
+    <div class="card-body">
+        {% if expenses %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Expense Type</th>
+                            <th>Description</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for expense in expenses %}
+                        <tr>
+                            <td>{{ expense.date|date:"M d, Y" }}</td>
+                            <td><strong>{{ expense.expense_type }}</strong></td>
+                            <td>{{ expense.description }}</td>
+                            <td>
+                                <span class="text-danger fw-bold">₹{{ expense.amount|floatformat:2 }}</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-4">
+                <i class="bi bi-cash-x fs-1 text-muted"></i>
+                <p class="text-muted mt-2">No expenses recorded</p>
+                <a href="{% url 'services:add_expense' service_item.id %}" class="btn btn-info">
+                    <i class="bi bi-plus-circle me-1"></i>
+                    Add First Expense
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %} 

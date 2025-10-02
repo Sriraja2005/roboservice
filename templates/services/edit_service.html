@@ -1,0 +1,271 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Service - {{ service_item.customer.name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        <i class="bi bi-pencil text-primary me-2"></i>
+        Edit Service
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{% url 'services:service_inward_list' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>
+            Back to List
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-tools me-2"></i>
+                    Service Information
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="post" class="needs-validation" novalidate>
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.device_type.id_for_label }}" class="form-label">
+                                Device Type <span class="text-danger">*</span>
+                            </label>
+                            {{ form.device_type }}
+                            {% if form.device_type.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.device_type.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.brand.id_for_label }}" class="form-label">
+                                Brand <span class="text-danger">*</span>
+                            </label>
+                            {{ form.brand }}
+                            {% if form.brand.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.brand.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.model.id_for_label }}" class="form-label">
+                                Model <span class="text-danger">*</span>
+                            </label>
+                            {{ form.model }}
+                            {% if form.model.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.model.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.serial_number.id_for_label }}" class="form-label">
+                                Serial Number
+                            </label>
+                            {{ form.serial_number }}
+                            {% if form.serial_number.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.serial_number.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.problem_description.id_for_label }}" class="form-label">
+                            Problem Description <span class="text-danger">*</span>
+                        </label>
+                        {{ form.problem_description }}
+                        {% if form.problem_description.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.problem_description.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.accessories_received.id_for_label }}" class="form-label">
+                            Accessories Received
+                        </label>
+                        {{ form.accessories_received }}
+                        {% if form.accessories_received.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.accessories_received.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.estimated_cost.id_for_label }}" class="form-label">
+                                Estimated Cost
+                            </label>
+                            {{ form.estimated_cost }}
+                            {% if form.estimated_cost.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.estimated_cost.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.actual_cost.id_for_label }}" class="form-label">
+                                Actual Cost
+                            </label>
+                            <div class="input-group">
+                                {{ form.actual_cost }}
+                                <button type="button" class="btn btn-outline-primary" 
+                                        onclick="updateActualCost('{{ service_item.id }}', document.getElementById('{{ form.actual_cost.id_for_label }}'))">
+                                    <i class="bi bi-check-circle"></i> Update AJAX
+                                </button>
+                            </div>
+                            <small class="form-text text-muted">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Click "Update AJAX" to save changes immediately, or use the main form below
+                            </small>
+                            {% if form.actual_cost.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.actual_cost.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.technician_notes.id_for_label }}" class="form-label">
+                            Technician Notes
+                        </label>
+                        {{ form.technician_notes }}
+                        {% if form.technician_notes.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.technician_notes.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.problem_resolved.id_for_label }}" class="form-label">
+                            Problem Resolved
+                        </label>
+                        {{ form.problem_resolved }}
+                        {% if form.problem_resolved.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.problem_resolved.errors.0 }}
+                            </div>
+                        {% endif %}
+                        <small class="form-text text-muted">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Describe how the problem was resolved and what work was performed
+                        </small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.payment_status.id_for_label }}" class="form-label">
+                            Payment Status
+                        </label>
+                        <div class="input-group">
+                            {{ form.payment_status }}
+                            <button type="button" class="btn btn-outline-primary" 
+                                    onclick="updatePaymentStatus('{{ service_item.id }}', document.getElementById('{{ form.payment_status.id_for_label }}'))">
+                                <i class="bi bi-check-circle"></i> Update
+                            </button>
+                        </div>
+                        <small class="form-text text-muted">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Click "Update" to save payment status immediately
+                        </small>
+                        {% if form.payment_status.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.payment_status.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{% url 'services:service_inward_list' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle me-1"></i>
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle me-1"></i>
+                            Update Service
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Current Information
+                </h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Customer:</strong><br>{{ service_item.customer.name }}</p>
+                <p><strong>Phone:</strong><br>{{ service_item.customer.phone }}</p>
+                <p><strong>Current Status:</strong><br>
+                    {% if service_item.status == 'pending' %}
+                        <span class="badge bg-warning">Pending</span>
+                    {% elif service_item.status == 'in_progress' %}
+                        <span class="badge bg-info">In Progress</span>
+                    {% elif service_item.status == 'completed' %}
+                        <span class="badge bg-success">Completed</span>
+                    {% elif service_item.status == 'delivered' %}
+                        <span class="badge bg-primary">Delivered</span>
+                    {% else %}
+                        <span class="badge bg-danger">Cancelled</span>
+                    {% endif %}
+                </p>
+                <p><strong>Received Date:</strong><br>{{ service_item.received_date|date:"M d, Y" }}</p>
+                {% if service_item.completed_date %}
+                <p><strong>Completed Date:</strong><br>{{ service_item.completed_date|date:"M d, Y" }}</p>
+                {% endif %}
+                {% if service_item.delivered_date %}
+                <p><strong>Delivered Date:</strong><br>{{ service_item.delivered_date|date:"M d, Y" }}</p>
+                {% endif %}
+                <p><strong>Estimated Cost:</strong><br>₹{{ service_item.estimated_cost|floatformat:2 }}</p>
+                <p><strong>Current Actual Cost:</strong><br>₹{{ service_item.actual_cost|floatformat:2 }}</p>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-link-45deg me-2"></i>
+                    Quick Actions
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'services:service_ledger_detail' service_item.id %}" class="btn btn-outline-info btn-sm">
+                        <i class="bi bi-journal-text me-1"></i>
+                        View Ledger
+                    </a>
+                    <a href="{% url 'services:add_ledger_entry' service_item.id %}" class="btn btn-outline-success btn-sm">
+                        <i class="bi bi-plus-circle me-1"></i>
+                        Add Ledger Entry
+                    </a>
+                    <a href="{% url 'services:print_service_report' service_item.id %}" class="btn btn-outline-warning btn-sm" target="_blank">
+                        <i class="bi bi-printer me-1"></i>
+                        Print Report
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

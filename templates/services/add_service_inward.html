@@ -1,0 +1,372 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Service Inward - Service Management{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        <i class="bi bi-plus-circle text-primary me-2"></i>
+        Add New Service Inward
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{% url 'services:service_inward_list' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>
+            Back to List
+        </a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i class="bi bi-clipboard-data me-2"></i>
+            Service Inward Information
+        </h5>
+    </div>
+    <div class="card-body">
+        <!-- Form Errors Summary -->
+        {% if customer_form.errors or service_form.errors or inward_form.errors %}
+        <div class="alert alert-danger mb-4">
+            <h6><i class="bi bi-exclamation-triangle me-2"></i>Please correct the following errors:</h6>
+            {% if customer_form.errors %}
+                <div class="mb-2">
+                    <strong>Customer Information:</strong>
+                    <ul class="mb-0">
+                        {% for field, errors in customer_form.errors.items %}
+                            {% for error in errors %}
+                                <li>{{ field|title }}: {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+            {% if service_form.errors %}
+                <div class="mb-2">
+                    <strong>Service Information:</strong>
+                    <ul class="mb-0">
+                        {% for field, errors in service_form.errors.items %}
+                            {% for error in errors %}
+                                <li>{{ field|title }}: {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+            {% if inward_form.errors %}
+                <div class="mb-2">
+                    <strong>Inward Information:</strong>
+                    <ul class="mb-0">
+                        {% for field, errors in inward_form.errors.items %}
+                            {% for error in errors %}
+                                <li>{{ field|title }}: {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        <form method="post" class="needs-validation" novalidate>
+            {% csrf_token %}
+            
+            <!-- Customer Information -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h6 class="text-primary mb-3">
+                        <i class="bi bi-person me-2"></i>
+                        Customer Information
+                    </h6>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label for="{{ customer_form.name.id_for_label }}" class="form-label">
+                        Customer Name <span class="text-danger">*</span>
+                    </label>
+                    {{ customer_form.name }}
+                    {% if customer_form.name.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ customer_form.name.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label for="{{ customer_form.phone.id_for_label }}" class="form-label">
+                        Phone Number <span class="text-danger">*</span>
+                    </label>
+                    {{ customer_form.phone }}
+                    {% if customer_form.phone.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ customer_form.phone.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label for="{{ customer_form.email.id_for_label }}" class="form-label">
+                        Email Address
+                    </label>
+                    {{ customer_form.email }}
+                    {% if customer_form.email.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ customer_form.email.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label for="{{ customer_form.address.id_for_label }}" class="form-label">
+                        Address <span class="text-danger">*</span>
+                    </label>
+                    {{ customer_form.address }}
+                    {% if customer_form.address.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ customer_form.address.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Device Information -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h6 class="text-primary mb-3">
+                        <i class="bi bi-tools me-2"></i>
+                        Device Information
+                    </h6>
+                </div>
+                
+                <div class="col-md-4 mb-3">
+                    <label for="{{ service_form.device_type.id_for_label }}" class="form-label">
+                        Device Type <span class="text-danger">*</span>
+                    </label>
+                    {{ service_form.device_type }}
+                    {% if service_form.device_type.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ service_form.device_type.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="col-md-4 mb-3">
+                    <label for="{{ service_form.brand.id_for_label }}" class="form-label">
+                        Brand <span class="text-danger">*</span>
+                    </label>
+                    {{ service_form.brand }}
+                    {% if service_form.brand.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ service_form.brand.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="col-md-4 mb-3">
+                    <label for="{{ service_form.model.id_for_label }}" class="form-label">
+                        Model <span class="text-danger">*</span>
+                    </label>
+                    {{ service_form.model }}
+                    {% if service_form.model.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ service_form.model.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label for="{{ service_form.serial_number.id_for_label }}" class="form-label">
+                        Serial Number
+                    </label>
+                    {{ service_form.serial_number }}
+                    {% if service_form.serial_number.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ service_form.serial_number.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label for="{{ service_form.estimated_cost.id_for_label }}" class="form-label">
+                        Estimated Cost
+                    </label>
+                    {{ service_form.estimated_cost }}
+                    {% if service_form.estimated_cost.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ service_form.estimated_cost.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="col-12 mb-3">
+                    <label for="{{ service_form.problem_description.id_for_label }}" class="form-label">
+                        Problem Description <span class="text-danger">*</span>
+                    </label>
+                    {{ service_form.problem_description }}
+                    {% if service_form.problem_description.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ service_form.problem_description.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="col-12 mb-3">
+                    <label for="{{ service_form.accessories_received.id_for_label }}" class="form-label">
+                        Accessories Received
+                    </label>
+                    {{ service_form.accessories_received }}
+                    {% if service_form.accessories_received.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ service_form.accessories_received.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="col-12 mb-3">
+                    <label for="{{ service_form.problem_resolved.id_for_label }}" class="form-label">
+                        Problem Resolved (Optional)
+                    </label>
+                    {{ service_form.problem_resolved }}
+                    <small class="form-text text-muted">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Describe how the problem was resolved (can be filled later when service is completed)
+                    </small>
+                    {% if service_form.problem_resolved.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ service_form.problem_resolved.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label for="{{ service_form.payment_status.id_for_label }}" class="form-label">
+                        Payment Status
+                    </label>
+                    {{ service_form.payment_status }}
+                    <small class="form-text text-muted">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Default is "Payment Pending" - can be updated later
+                    </small>
+                    {% if service_form.payment_status.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ service_form.payment_status.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Inward Information -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h6 class="text-primary mb-3">
+                        <i class="bi bi-clipboard-check me-2"></i>
+                        Inward Information
+                    </h6>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label for="{{ inward_form.inward_number.id_for_label }}" class="form-label">
+                        Inward Number <span class="text-danger">*</span>
+                    </label>
+                    {{ inward_form.inward_number }}
+                    <small class="form-text text-muted">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Auto-generated in RDC format (e.g., RDC0001, RDC0002)
+                    </small>
+                    {% if inward_form.inward_number.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ inward_form.inward_number.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label for="{{ inward_form.received_by.id_for_label }}" class="form-label">
+                        Received By <span class="text-danger">*</span>
+                    </label>
+                    {{ inward_form.received_by }}
+                    {% if inward_form.received_by.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ inward_form.received_by.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label for="{{ inward_form.estimated_delivery_date.id_for_label }}" class="form-label">
+                        Estimated Delivery Date <span class="text-danger">*</span>
+                    </label>
+                    {{ inward_form.estimated_delivery_date }}
+                    {% if inward_form.estimated_delivery_date.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ inward_form.estimated_delivery_date.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="col-12 mb-3">
+                    <label for="{{ inward_form.condition_on_receipt.id_for_label }}" class="form-label">
+                        Condition on Receipt <span class="text-danger">*</span>
+                    </label>
+                    {{ inward_form.condition_on_receipt }}
+                    {% if inward_form.condition_on_receipt.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ inward_form.condition_on_receipt.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Submit Buttons -->
+            <div class="row">
+                <div class="col-12">
+                    <hr class="my-4">
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{% url 'services:service_inward_list' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle me-1"></i>
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle me-1"></i>
+                            Create Service Inward
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Form validation
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }, false);
+})();
+
+// Auto-generate inward number
+document.addEventListener('DOMContentLoaded', function() {
+    const inwardNumberField = document.getElementById('{{ inward_form.inward_number.id_for_label }}');
+    if (inwardNumberField && !inwardNumberField.value) {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        const timestamp = Date.now().toString().slice(-4);
+        inwardNumberField.value = `INW${year}${month}${day}${timestamp}`;
+    }
+});
+</script>
+{% endblock %} 

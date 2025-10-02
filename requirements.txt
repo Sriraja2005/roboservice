@@ -1,0 +1,8 @@
+Django==5.2.5
+asgiref==3.9.1
+sqlparse==0.5.3
+tzdata==2025.2
+psycopg2-binary==2.9.10 
+supabase==2.20.0
+python-dotenv==1.1.1
+dj-database-url==3.0.1
